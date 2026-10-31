@@ -25,3 +25,6 @@ frontend/vite.config.d.ts
 # OS files
 .DS_Store
 Thumbs.db
+
+# Backend coverage reports
+backend/coverage*
