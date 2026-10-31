@@ -1,0 +1,22 @@
+silent: false
+unleash:
+  workers: 2
+  test-cpu: 1
+  timeout-coefficient: 3
+  threshold:
+    efficacy: 90
+    mutant-coverage: 90
+  exclude-files:
+    - "cmd/"
+    - "tools.go"
+mutants:
+  arithmetic-base:
+    enabled: true
+  conditionals-boundary:
+    enabled: true
+  conditionals-negation:
+    enabled: true
+  increment-decrement:
+    enabled: true
+  invert-negatives:
+    enabled: true
