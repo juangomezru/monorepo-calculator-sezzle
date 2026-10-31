@@ -1,0 +1,27 @@
+# Go build output
+backend/*.exe
+backend/bin/
+backend/coverage.out
+
+# Node dependencies and build output
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+frontend/.stryker-tmp/
+frontend/reports/
+frontend/*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Editor settings
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
