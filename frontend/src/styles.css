@@ -1,0 +1,235 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: #17212b;
+  background: #eef4fb;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 15% 0%, #dcecff 0, transparent 38rem),
+    radial-gradient(circle at 90% 15%, #e8f8f1 0, transparent 32rem),
+    #eef4fb;
+}
+
+button {
+  font: inherit;
+}
+
+.shell {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: clamp(2rem, 6vw, 4.5rem) 1.25rem;
+}
+
+.hero {
+  text-align: center;
+}
+
+.eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: #52708a;
+  font-weight: 700;
+}
+
+.hero h1 {
+  margin: 0.5rem 0 0.25rem;
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.workspace {
+  display: grid;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.calculator {
+  width: min(100%, 420px);
+  padding: 1.1rem;
+  border-radius: 28px;
+  border: 1px solid #d9e6f3;
+  box-shadow: 0 24px 60px #18334d1f, 0 2px 8px #18334d0f;
+}
+
+.display {
+  display: grid;
+  gap: 0.3rem;
+  padding: 1.15rem 1.25rem 1rem;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #16202b, #233447);
+  color: #f7fbff;
+  box-shadow: inset 0 2px 14px #00000045;
+}
+
+.display-expression {
+  min-height: 1.2em;
+  color: #8fb4d6;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.display-value {
+  overflow-wrap: anywhere;
+  font-size: clamp(2.1rem, 8vw, 3rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  text-align: right;
+}
+
+.display-caption {
+  color: #7f9ab5;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.calculator-error {
+  margin-top: 0.9rem;
+}
+
+.calculation-trail {
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid #3c5267;
+}
+
+.calculation-trail {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.trail-expression {
+  display: block;
+  overflow-x: auto;
+  margin: 0;
+  padding: 0.3rem 0 0;
+  color: #7f9ab5;
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
+  text-align: right;
+  white-space: nowrap;
+  scrollbar-width: thin;
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.calc-key {
+  width: 100%;
+  min-width: 0;
+  min-height: 58px;
+  padding: 0 !important;
+  border-radius: 16px !important;
+  font-size: 1.12rem;
+  font-weight: 600;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.calc-key:active:not(:disabled) {
+  transform: translateY(1px) scale(0.99);
+}
+
+.key-digit {
+  background-color: #ffffff !important;
+  border: 1px solid #dbe5ef !important;
+  color: #17212b !important;
+}
+
+.key-function {
+  background-color: #e8f0f9 !important;
+  border: 1px solid #d5e2ef !important;
+  color: #29425b !important;
+}
+
+.key-operator {
+  background-color: #dcecff !important;
+  border: 1px solid #c5ddf8 !important;
+  color: #0b5cad !important;
+  font-size: 1.35rem;
+}
+
+.key-equals {
+  grid-column: 4;
+  grid-row: 5 / span 2;
+  border: 0 !important;
+  background: linear-gradient(160deg, #0b72d4, #0b5cad) !important;
+  box-shadow: 0 10px 20px #0b5cad40;
+  color: #ffffff !important;
+  font-size: 1.5rem;
+}
+
+.key-zero {
+  grid-column: 1 / span 2;
+  grid-row: 6;
+}
+
+.key-decimal {
+  grid-column: 3;
+  grid-row: 6;
+}
+
+footer {
+  margin-top: 1.5rem;
+  color: #718391;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+@media (max-width: 820px) {
+  .workspace { max-width: 460px; margin-right: auto; margin-left: auto; }
+}
+
+@media (max-width: 520px) {
+  .shell {
+    padding: 1rem 0.7rem;
+  }
+
+  .calculator {
+    padding: 0.7rem;
+    border-radius: 22px;
+  }
+
+  .keypad {
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+  }
+
+  .calc-key {
+    min-height: 0;
+    aspect-ratio: 1.35;
+    border-radius: 12px !important;
+    font-size: 1rem;
+  }
+
+  .key-operator {
+    font-size: 1.15rem;
+  }
+
+  .key-equals {
+    font-size: 1.3rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
