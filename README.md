@@ -55,6 +55,7 @@ A full-stack, stateless calculator with a physical-calculator keypad in React/Ty
 │   │   ├── App.test.tsx             # keypad, trail, keyboard, loading, and error UI tests
 │   │   ├── api.test.ts              # API client tests
 │   │   ├── calculator.test.ts       # state-machine and formatter tests
+│   │   ├── integration.test.ts      # frontend client against the Go HTTP server
 │   │   ├── keypad.test.ts           # keypad layout and shortcut tests
 │   │   └── setup.ts                 # Testing Library and ResizeObserver setup
 │   ├── stryker.config.json          # Stryker mutation-testing configuration
@@ -68,7 +69,7 @@ A full-stack, stateless calculator with a physical-calculator keypad in React/Ty
 ## Prerequisites
 
 - Go 1.22+
-- Node.js 22.12+ and npm 10+
+- Node.js 22.18+ and npm 10+
 - Docker (optional, for the container workflow or the Windows Gremlins runner)
 
 ## Local setup
@@ -305,9 +306,8 @@ The UI is on `http://localhost:3000` and the API on `http://localhost:8080`. The
 ## AI assistance and prompts
 
 This solution used the following prompts to automate repetitive scaffolding,
-refactoring, test-maintenance, and verification work. They are the actual prompts
-used during development, with additional wording to make their intent and
-expected output explicit.
+refactoring, test-maintenance, and verification work. Original prompts,
+consolidated and edited for readability.
 
 1. **Initial project scaffolding**
 
