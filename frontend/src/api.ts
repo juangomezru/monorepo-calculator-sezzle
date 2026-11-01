@@ -29,16 +29,30 @@ export async function calculate(
   const timeout = setTimeout(() => controller.abort('timeout'), options.timeoutMs ?? 10_000);
   const signal = options.signal;
   const abort = () => controller.abort(signal?.reason);
-  signal?.addEventListener('abort', abort, { once: true });
+  if (signal?.aborted) {
+    controller.abort(signal.reason);
+  } else {
+    signal?.addEventListener('abort', abort, { once: true });
+  }
 
   let response: Response;
+  let data: CalculateResponse | null = null;
   try {
+    if (signal?.aborted) {
+      throw signal.reason ?? new DOMException('The request was aborted.', 'AbortError');
+    }
     response = await (options.fetchImpl ?? fetch)(joinUrl(options.baseUrl ?? '', '/api/v1/calculate'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ operation, operandA, operandB: operandB ?? null }),
       signal: controller.signal,
     });
+    try {
+      data = (await response.json()) as CalculateResponse;
+    } catch (error) {
+      if (controller.signal.aborted) throw error;
+      data = null;
+    }
   } catch (error) {
     if (controller.signal.reason === 'timeout') {
       throw new Error('The calculator service timed out.');
@@ -47,13 +61,6 @@ export async function calculate(
   } finally {
     clearTimeout(timeout);
     signal?.removeEventListener('abort', abort);
-  }
-
-  let data: CalculateResponse | null = null;
-  try {
-    data = (await response.json()) as CalculateResponse;
-  } catch {
-    data = null;
   }
 
   if (!response.ok) {

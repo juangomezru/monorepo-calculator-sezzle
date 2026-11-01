@@ -140,6 +140,31 @@ describe('calculate', () => {
     );
   });
 
+  it('times out while reading a response body', async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: vi.fn(
+        () =>
+          new Promise((_resolve, reject) => {
+            setTimeout(() => reject(new DOMException('Aborted', 'AbortError')), 20);
+          }),
+      ),
+    } as unknown as Response);
+
+    await expect(calculate('add', 1, 2, { timeoutMs: 1 })).rejects.toThrow(
+      'The calculator service timed out.',
+    );
+  });
+
+  it('rejects before starting when the caller signal is already aborted', async () => {
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(calculate('add', 1, 2, { signal: controller.signal })).rejects.toThrow();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('includes unexpected HTTP status in the fallback error', async () => {
     fetchMock.mockResolvedValue(response({}, false, 503));
 
