@@ -1,14 +1,30 @@
+import { createServer } from 'node:net';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { calculate } from '../src/api';
 
-const port = 18081;
-const baseUrl = `http://127.0.0.1:${port}`;
+let baseUrl: string;
 let backend: ChildProcess;
 
+async function findAvailablePort(): Promise<number> {
+  const server = createServer();
+  await new Promise<void>((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(0, '127.0.0.1', () => resolve());
+  });
+  const address = server.address();
+  if (!address || typeof address === 'string') {
+    server.close();
+    throw new Error('Could not allocate a test port');
+  }
+  const port = address.port;
+  await new Promise<void>((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
+  return port;
+}
+
 async function waitForBackend(): Promise<void> {
-  for (let attempt = 0; attempt < 50; attempt += 1) {
+  for (let attempt = 0; attempt < 150; attempt += 1) {
     const response = await fetch(`${baseUrl}/health`).catch(() => null);
     if (response?.ok) return;
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -18,6 +34,8 @@ async function waitForBackend(): Promise<void> {
 
 describe('frontend API client against the Go backend', () => {
   beforeAll(async () => {
+    const port = await findAvailablePort();
+    baseUrl = `http://127.0.0.1:${port}`;
     backend = spawn('go', ['run', './cmd/api'], {
       cwd: join(process.cwd(), '..', 'backend'),
       env: {
@@ -28,10 +46,15 @@ describe('frontend API client against the Go backend', () => {
       stdio: 'ignore',
     });
     await waitForBackend();
-  }, 30_000);
+  }, 45_000);
 
-  afterAll(() => {
-    backend.kill();
+  afterAll(async () => {
+    if (!backend) return;
+    if (backend.exitCode !== null || backend.signalCode !== null) return;
+    await new Promise<void>((resolve) => {
+      backend.once('exit', () => resolve());
+      backend.kill();
+    });
   });
 
   it('returns the backend result through the frontend API client', async () => {
