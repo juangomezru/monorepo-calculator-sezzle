@@ -2,8 +2,6 @@ package calculator
 
 import "math"
 
-// Calculate validates and executes one operation. OperandB is ignored for unary
-// operations and may be nil for those operations.
 func Calculate(name string, operandA, operandB *float64) (float64, error) {
 	spec, ok := operations[name]
 	if !ok {

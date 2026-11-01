@@ -18,8 +18,6 @@ const (
 	maxRequestBody       = 1 << 20
 )
 
-// CalculateFunc matches the calculator domain entry point. It lets the
-// transport accept an alternate implementation without relying on globals.
 type CalculateFunc func(name string, operandA, operandB *float64) (float64, error)
 
 type API struct {
@@ -31,8 +29,6 @@ func NewHandler(corsOrigin string) http.Handler {
 	return NewHandlerWithCalculator(corsOrigin, calculator.Calculate)
 }
 
-// NewHandlerWithCalculator builds a handler around the supplied calculation
-// function. It keeps the transport independently testable and extensible.
 func NewHandlerWithCalculator(corsOrigin string, calculate CalculateFunc) http.Handler {
 	return &API{corsOrigin: corsOrigin, calculateFn: calculate}
 }
