@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { calculate } from '../api';
 import {
   applyChainedResult,
@@ -40,25 +40,39 @@ export function useCalculator(): CalculatorController {
   const [state, setState] = useState<CalculatorState>(createInitialState);
   const [trail, setTrail] = useState('');
   const [loading, setLoading] = useState(false);
+  const requestId = useRef(0);
+  const activeRequest = useRef<AbortController | null>(null);
+
+  useEffect(() => () => activeRequest.current?.abort(), []);
 
   async function runCalculation(
     input: CalculationInput,
     apply: ApplyResult,
     expression: string,
   ) {
+    const currentRequestId = ++requestId.current;
+    activeRequest.current?.abort();
+    const controller = new AbortController();
+    activeRequest.current = controller;
     setLoading(true);
     try {
       const result = await calculate(
         input.operation,
         input.operandA,
         input.operation === 'sqrt' ? undefined : input.operandB,
+        { signal: controller.signal },
       );
+      if (currentRequestId !== requestId.current) return;
       setState((current) => apply(current, result));
       setTrail(expression);
     } catch (error) {
+      if (currentRequestId !== requestId.current || controller.signal.aborted) return;
       setState((current) => withError(current, errorMessage(error)));
     } finally {
-      setLoading(false);
+      if (currentRequestId === requestId.current) {
+        activeRequest.current = null;
+        setLoading(false);
+      }
     }
   }
 

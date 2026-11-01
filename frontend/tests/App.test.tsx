@@ -138,6 +138,7 @@ describe('binary operations', () => {
           testCase.operation,
           Number(testCase.left),
           Number(testCase.right),
+          expect.any(Object),
         ),
       );
       await waitFor(() => expect(display()).toBe(String(testCase.result)));
@@ -178,14 +179,14 @@ describe('binary operations', () => {
     await clickDigits(user, '3');
     await user.click(key('Add'));
 
-    await waitFor(() => expect(mockedCalculate).toHaveBeenNthCalledWith(1, 'add', 2, 3));
+    await waitFor(() => expect(mockedCalculate).toHaveBeenNthCalledWith(1, 'add', 2, 3, expect.any(Object)));
     await waitFor(() => expect(display()).toBe('5'));
     expect(screen.getByText('5 +')).toBeInTheDocument();
 
     await clickDigits(user, '4');
     await user.click(key('Equals'));
 
-    await waitFor(() => expect(mockedCalculate).toHaveBeenNthCalledWith(2, 'add', 5, 4));
+    await waitFor(() => expect(mockedCalculate).toHaveBeenNthCalledWith(2, 'add', 5, 4, expect.any(Object)));
     await waitFor(() => expect(display()).toBe('9'));
   });
 });
@@ -199,7 +200,7 @@ describe('square root', () => {
     await clickDigits(user, '9');
     await user.click(key('Square root'));
 
-    await waitFor(() => expect(mockedCalculate).toHaveBeenCalledWith('sqrt', 9, undefined));
+    await waitFor(() => expect(mockedCalculate).toHaveBeenCalledWith('sqrt', 9, undefined, expect.any(Object)));
     await waitFor(() => expect(display()).toBe('3'));
   });
 
@@ -215,11 +216,11 @@ describe('square root', () => {
     await clickDigits(user, '16');
     await user.click(key('Square root'));
 
-    await waitFor(() => expect(mockedCalculate).toHaveBeenNthCalledWith(1, 'sqrt', 16, undefined));
+    await waitFor(() => expect(mockedCalculate).toHaveBeenNthCalledWith(1, 'sqrt', 16, undefined, expect.any(Object)));
     await waitFor(() => expect(display()).toBe('4'));
 
     await user.click(key('Equals'));
-    await waitFor(() => expect(mockedCalculate).toHaveBeenNthCalledWith(2, 'add', 9, 4));
+    await waitFor(() => expect(mockedCalculate).toHaveBeenNthCalledWith(2, 'add', 9, 4, expect.any(Object)));
     await waitFor(() => expect(display()).toBe('13'));
   });
 });
@@ -406,7 +407,7 @@ describe('keyboard support', () => {
     fireEvent.keyDown(window, { key: '2' });
     fireEvent.keyDown(window, { key: 'Enter' });
 
-    await waitFor(() => expect(mockedCalculate).toHaveBeenCalledWith('add', 7, 2));
+    await waitFor(() => expect(mockedCalculate).toHaveBeenCalledWith('add', 7, 2, expect.any(Object)));
     await waitFor(() => expect(display()).toBe('9'));
   });
 
@@ -427,7 +428,7 @@ describe('keyboard support', () => {
     fireEvent.keyDown(window, { key: '2' });
     fireEvent.keyDown(window, { key: 'Enter' });
 
-    await waitFor(() => expect(mockedCalculate).toHaveBeenCalledWith(operation, 8, 2));
+    await waitFor(() => expect(mockedCalculate).toHaveBeenCalledWith(operation, 8, 2, expect.any(Object)));
   });
 
   it('accepts a comma as a decimal separator and C as clear', () => {
@@ -460,7 +461,7 @@ describe('keyboard support', () => {
     fireEvent.keyDown(window, { key: '6' });
     fireEvent.keyDown(window, { key: 'r' });
 
-    await waitFor(() => expect(mockedCalculate).toHaveBeenCalledWith('sqrt', 16, undefined));
+    await waitFor(() => expect(mockedCalculate).toHaveBeenCalledWith('sqrt', 16, undefined, expect.any(Object)));
     await waitFor(() => expect(display()).toBe('4'));
 
     fireEvent.keyDown(window, { key: 'Escape' });

@@ -8,22 +8,58 @@ type CalculateResponse = {
   error?: { code?: string; message?: string };
 };
 
-export async function calculate(operation: Operation, operandA: number, operandB?: number): Promise<number> {
-  const response = await fetch('/api/v1/calculate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ operation, operandA, operandB: operandB ?? null }),
-  });
+export type CalculateOptions = {
+  signal?: AbortSignal;
+  timeoutMs?: number;
+  baseUrl?: string;
+  fetchImpl?: typeof fetch;
+};
+
+function joinUrl(baseUrl: string, path: string): string {
+  return `${baseUrl.replace(/\/$/, '')}${path}`;
+}
+
+export async function calculate(
+  operation: Operation,
+  operandA: number,
+  operandB?: number,
+  options: CalculateOptions = {},
+): Promise<number> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort('timeout'), options.timeoutMs ?? 10_000);
+  const signal = options.signal;
+  const abort = () => controller.abort(signal?.reason);
+  signal?.addEventListener('abort', abort, { once: true });
+
+  let response: Response;
+  try {
+    response = await (options.fetchImpl ?? fetch)(joinUrl(options.baseUrl ?? '', '/api/v1/calculate'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ operation, operandA, operandB: operandB ?? null }),
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (controller.signal.reason === 'timeout') {
+      throw new Error('The calculator service timed out.');
+    }
+    throw error instanceof Error ? error : new Error('Unable to reach the calculator service.');
+  } finally {
+    clearTimeout(timeout);
+    signal?.removeEventListener('abort', abort);
+  }
 
   let data: CalculateResponse | null = null;
   try {
     data = (await response.json()) as CalculateResponse;
   } catch {
-    // A malformed or empty body is treated as a missing payload.
+    data = null;
   }
 
   if (!response.ok) {
-    throw new Error(data?.error?.message || 'The calculation could not be completed.');
+    throw new Error(
+      data?.error?.message || `The calculation could not be completed (HTTP ${response.status}).`,
+    );
   }
   if (typeof data?.result !== 'number' || !Number.isFinite(data.result)) {
     throw new Error('The calculator service returned an invalid response.');

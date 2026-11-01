@@ -38,11 +38,12 @@ describe('calculate', () => {
 
     await expect(calculate('add', 2, 3)).resolves.toBe(5);
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/v1/calculate', {
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/calculate', expect.objectContaining({
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ operation: 'add', operandA: 2, operandB: 3 }),
-    });
+    }));
+    expect(fetchMock.mock.calls[0][1]?.signal).toBeInstanceOf(AbortSignal);
   });
 
   it('sends a null second operand for unary operations', async () => {
@@ -76,13 +77,17 @@ describe('calculate', () => {
   it('falls back to a friendly message when the API error has no message', async () => {
     fetchMock.mockResolvedValue(response({ error: { code: 'invalid_input' } }, false, 400));
 
-    await expect(calculate('add', 1, 2)).rejects.toThrow('The calculation could not be completed.');
+    await expect(calculate('add', 1, 2)).rejects.toThrow(
+      'The calculation could not be completed (HTTP 400).',
+    );
   });
 
   it('falls back when an unsuccessful response has no error object', async () => {
     fetchMock.mockResolvedValue(response({}, false, 500));
 
-    await expect(calculate('add', 1, 2)).rejects.toThrow('The calculation could not be completed.');
+    await expect(calculate('add', 1, 2)).rejects.toThrow(
+      'The calculation could not be completed (HTTP 500).',
+    );
   });
 
   it('rejects an unsuccessful response without a JSON body', async () => {
@@ -92,7 +97,9 @@ describe('calculate', () => {
       json: vi.fn().mockRejectedValue(new Error('invalid json')),
     } as unknown as Response);
 
-    await expect(calculate('add', 1, 2)).rejects.toThrow('The calculation could not be completed.');
+    await expect(calculate('add', 1, 2)).rejects.toThrow(
+      'The calculation could not be completed (HTTP 500).',
+    );
   });
 
   it('rejects a successful response without a numeric result', async () => {
@@ -119,5 +126,25 @@ describe('calculate', () => {
     fetchMock.mockRejectedValue(new Error('network down'));
 
     await expect(calculate('add', 1, 2)).rejects.toThrow('network down');
+  });
+
+  it('reports request timeouts', async () => {
+    fetchMock.mockImplementation((_url, init: RequestInit) =>
+      new Promise((_resolve, reject) => {
+        init.signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')));
+      }),
+    );
+
+    await expect(calculate('add', 1, 2, { timeoutMs: 1 })).rejects.toThrow(
+      'The calculator service timed out.',
+    );
+  });
+
+  it('includes unexpected HTTP status in the fallback error', async () => {
+    fetchMock.mockResolvedValue(response({}, false, 503));
+
+    await expect(calculate('add', 1, 2)).rejects.toThrow(
+      'The calculation could not be completed (HTTP 503).',
+    );
   });
 });
