@@ -203,7 +203,7 @@ The UI is an immediate-execution calculator:
 - `Clear history` removes the trail without changing the current display. Failed calculations are not added to the trail.
 - `√` evaluates the current entry immediately. If a binary operation is pending, the square-root result becomes its right operand.
 - `%` means “A percent of B”: `25 % 20 =` evaluates `percentage(25, 20)`, or 5. The trail renders this as `25% of 20 = 5`.
-- Results are rounded to 12 significant digits for display only; the API result is not modified.
+- Results keep their full JavaScript number in calculator state; `formatNumber` rounds to 12 significant digits only when rendering the display and trail.
 - Invalid characters are ignored, entries are capped at 16 digits (sign and decimal point excluded), and only one decimal point is allowed.
 - Calculation errors appear inline; the next digit or operator starts a fresh entry while square root clears the error.
 - The keypad is disabled while a request is in flight to prevent overlapping calculations.
@@ -266,11 +266,15 @@ Stryker writes `reports/mutation/mutation.html` and `reports/mutation/mutation.j
 
 ## Design decisions and assumptions
 
+**Go standard library over a framework.** This small API needs routing, JSON, CORS, and graceful process wiring that `net/http` and the standard library already provide. Avoiding framework dependencies keeps the binary small, the request lifecycle explicit, and the assessment focused on domain behavior.
+
 **Backend is authoritative.** The Go domain owns validation and arithmetic, so clients cannot bypass edge-case handling. The frontend validates only enough to keep the keypad usable.
 
 **Domain separated from transport.** `internal/calculator` has no HTTP imports. Operations live in a registry, so adding an operation is one map entry with an arity and an `apply` function. `internal/httpapi` maps domain error codes to JSON and status codes, and `internal/config` keeps deployment concerns out of the domain.
 
 **Typed frontend state machine.** `calculator.ts` contains pure transitions (`inputDigit`, `selectOperation`, `applyResult`, and so on). This keeps React focused on presentation and makes behavior easy to unit test and mutate.
+
+**Floating-point limitations.** The calculator uses IEEE 754 binary floating-point numbers because the API contract is JSON numbers and the tool is general-purpose. Values such as `0.1 + 0.2` can contain a small representation error, so the UI formats values for readability without feeding rounded display text back into calculations. For financial calculations, I would use integer minor units where possible or a decimal type end to end, define explicit currency and rounding rules, and add currency-aware domain tests.
 
 **Modular frontend.** `useCalculator` owns state, API calls, history, and action dispatch; `useKeyboardInput` owns the global listener. UI components are small and presentational, while `operations.ts` and `keypad.ts` are the single source of truth for operation metadata, keypad layout, and keyboard shortcuts. `App.tsx` is only layout composition. Adding an operation therefore means updating the backend registry and one operation definition, then adding its keypad entry.
 
