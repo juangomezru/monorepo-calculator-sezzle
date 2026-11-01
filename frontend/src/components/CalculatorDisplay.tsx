@@ -1,4 +1,4 @@
-import { expressionLabel, type CalculatorState } from '../calculator';
+import { expressionLabel, formatNumber, type CalculatorState } from '../calculator';
 import { labels } from '../operations';
 import { CalculationTrail } from './CalculationTrail';
 
@@ -25,7 +25,7 @@ export function CalculatorDisplay({ state, loading, trail }: CalculatorDisplayPr
       <CalculationTrail trail={trail} />
       <span className="display-expression">{expressionLabel(state)}</span>
       <output className="display-value" aria-label="Calculator display">
-        {state.error ? 'Error' : state.entry}
+        {state.error ? 'Error' : state.justEvaluated ? formatNumber(Number(state.entry)) : state.entry}
       </output>
       <span className="display-caption">{caption}</span>
     </section>

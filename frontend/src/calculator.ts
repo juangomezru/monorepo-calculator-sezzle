@@ -127,7 +127,7 @@ export function selectOperation(state: CalculatorState, operation: BinaryOperati
 export function applyResult(state: CalculatorState, result: number): CalculatorState {
   return {
     ...state,
-    entry: formatNumber(result),
+    entry: String(result),
     storedValue: null,
     pendingOperation: null,
     replaceEntry: true,
@@ -143,7 +143,7 @@ export function applyChainedResult(
 ): CalculatorState {
   return {
     ...state,
-    entry: formatNumber(result),
+    entry: String(result),
     storedValue: result,
     pendingOperation: nextOperation,
     replaceEntry: true,
@@ -155,7 +155,7 @@ export function applyChainedResult(
 export function applyUnaryResult(state: CalculatorState, result: number): CalculatorState {
   return {
     ...state,
-    entry: formatNumber(result),
+    entry: String(result),
     replaceEntry: true,
     justEvaluated: true,
     error: '',

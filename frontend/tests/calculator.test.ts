@@ -29,6 +29,21 @@ describe('formatNumber', () => {
     expect(formatNumber(1.2345678901234567)).toBe('1.23456789012');
   });
 
+  it('keeps calculation results unrounded in state', () => {
+    const first = applyResult(selectOperation(enter('1'), 'divide'), 1 / 3);
+    const second = applyResult(selectOperation(first, 'multiply'), 1);
+
+    expect(first.entry).toBe(String(1 / 3));
+    expect(formatNumber(Number(first.entry))).toBe('0.333333333333');
+    expect(second.entry).toBe('1');
+  });
+
+  it('preserves expected arithmetic regression cases', () => {
+    expect(1 / 3 * 3).toBe(1);
+    expect(0.1 + 0.2).toBeCloseTo(0.3, 15);
+    expect(2 ** 10).toBe(1024);
+  });
+
   it('renders negative zero as zero', () => {
     expect(formatNumber(-0)).toBe('0');
   });
